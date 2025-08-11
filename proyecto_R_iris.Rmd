@@ -1,0 +1,239 @@
+---
+title: "Proyecto_R_IRIS"
+author: "Valeria Solís"
+date: "2025-04-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Carga de librerías
+
+```{r cars}
+library(readr)
+library(ggplot2)
+```
+
+# Leer el dataset desde un archivo ".csv"
+
+```{r pressure, echo=FALSE}
+iris <- read_csv("iris.csv")
+```
+
+# Ver el dataset
+
+```{r}
+View(iris)
+```
+
+# Primera Parte: Carga y exploración de datos
+## 1. Estructura del dataset
+
+```{r}
+str(iris)
+```
+
+## 2. Primeras y últimas 6 filas del dataset
+
+```{r}
+head(iris)
+tail(iris)
+```
+
+## 3. Tipo de datos por columna
+
+```{r}
+sapply(iris, typeof)
+sapply(iris, is.logical)
+sapply(iris, is.numeric)
+```
+
+## 4. Dimensiones del dataset
+
+```{r}
+dim(iris)
+```
+
+## 5. Verificación de valores faltantes
+### NA = valor faltante, NaN = resultado inválido (e.g., 0/0)
+### ¿Hay algún NA?
+
+```{r}
+any(is.na(iris))                
+```
+
+### Cantidad de NA por columna 
+
+```{r}
+colSums(is.na(iris))
+```
+
+### Verificar NaN solo en columnas numéricas
+
+```{r}
+solo_numericas <- sapply(iris, is.numeric)
+sum(is.nan(as.matrix(iris[, solo_numericas])))
+```
+
+# Segunda Parte: Estadísticas descriptivas básicas
+## 1-¿Cuál es el valor mínimo de una variable numérica en el dataset? 
+
+```{r}
+min(iris$Petal.Length)
+```
+
+## 2-¿Cuál es el valor máximo de una variable numérica en el dataset?
+
+```{r}
+max(iris$Petal.Length)
+```
+
+## 3-¿Cuál es la media de una variable numérica en el dataset?
+
+```{r}
+mean(iris$Petal.Length)
+```
+
+## 4-¿Cuál es la mediana de una variable numérica en el dataset?
+
+```{r}
+median(iris$Petal.Length)
+```
+
+## 5-¿Cuál es la desviación estándar de una variable numérica en el dataset?
+
+```{r}
+sd(iris$Petal.Length)
+```
+
+## 6-¿Cuál es el rango (diferencia entre el máximo y el mínimo) de una variable numérica en el dataset?
+
+```{r}
+range_value <- max(iris$Petal.Length) - min(iris$Petal.Length)
+range_value
+```
+
+## 7-¿Cuál es el rango intercuartílico (IQR) de una variable numérica en el dataset?
+
+```{r}
+data(iris)
+IQR(iris$Sepal.Length)
+```
+
+## 8-¿Cuál es la moda de una variable categórica en el dataset?
+
+```{r}
+species_counts <- table(iris$Species)
+most_common_species <- names(which.max(species_counts))
+most_common_species
+```
+
+# Tercera Parte: Manipulación de datos
+## 1-Calcular el porcentaje de valores faltantes en cada columna de un dataset.
+
+```{r}
+porcentaje_faltantes <- sapply(iris, function(columna) {
+  sum(is.na(columna)) / length(columna) * 100
+})
+porcentaje_faltantes
+```
+
+## 2-¿Cómo puedes eliminar las filas que contienen valores faltantes?
+
+```{r}
+datos_limpios <- na.omit(iris)
+```
+
+## 3-¿Cómo ordenar los valores de una columna numérica (orden decreciente)?
+
+```{r}
+# Seleccionar solo las columnas numéricas
+data(iris)
+numericas <- sapply(iris, is.numeric)
+print (numericas)
+# Obtener nombres de columnas numéricas
+col_numericas <- names(iris)[numericas]
+print(col_numericas)
+# Ordenar por todas las columnas numéricas (en orden de aparición)
+iris_numericas <- iris[, col_numericas]
+print(head(iris_numericas))
+# Utilizando la función sort
+sort(iris$Sepal.Length, decreasing = TRUE)
+```
+
+## 4-¿Cómo puedes seleccionar solo algunas columnas de un dataset?
+
+```{r}
+iris[, c("Sepal.Length", "Petal.Length")]
+print(iris)
+```
+
+## 5-¿Cómo podría agregar una nueva columna que sea el producto de dos variables numéricas existentes en su dataset?
+
+```{r}
+iris$Producto <- iris$Sepal.Length * iris$Petal.Length
+iris
+```
+
+## 6-Cambiar todos los nombres de las columnas del dataset
+
+```{r}
+names(iris) <- c("Largo_Sepalo", "Ancho_Sepalo", "Largo_Petalo", "Ancho_Petalo", "Especie", "Producto")
+head(iris)
+```
+
+# Cuarta Parte: Análisis comparativo de datos
+
+## 1-Visualizar la distribución de una variable numérica para diferentes categorías de una variable seleccionada por usted usando un boxplot.
+### Distribución de Sepal.Length para una especie.
+
+```{r}
+names(iris)
+ggplot(iris, aes(x = Especie, y = Largo_Sepalo, fill = Especie)) +
+  geom_boxplot() +
+  labs(title = "Distribución de Largo del Sépalo por especie",
+       x = "Especie", y = "Largo del Sépalo") +
+  theme_minimal()
+```
+
+## 2-Calcular la matriz de correlación. Investigar que es el coeficiente de correlación de Pearson e interpretar uno de los coeficientes de la matriz.
+### Calcular la matriz de correlación
+
+```{r}
+iris_numericas <- iris[, sapply(iris, is.numeric)]
+cor_matrix <- cor(iris_numericas)
+cor_matrix
+```
+
+### Interpretar uno de los coeficientes de la matriz: Tomando Sepal.Length y Petal.Length, veremos que existe una correlación significativa ya que el resultado es un valor de 0.87, esto quiere decir que, cuando una variable aumenta (por ejemplo, Sepal.Length), la otra también tiende a aumentar (Petal.Length).A partir de este dato podríamos predecir la longitud del pétalo a partir de la longitud del sépalo, dado que ambas tienen correlación.
+
+## 3-Seleccionar una variable numérica y construir un gráfico de densidad para analizar su distribución.
+### Variable Sepal.Length
+
+```{r}
+names(iris)
+ggplot(iris, aes(x = Largo_Sepalo, fill = Especie)) +
+  geom_density(alpha = 0.5) +
+  labs(
+    title = "Distribución del largo del sépalo por especie",
+    x = "Longitud del sépalo",
+    y = "Densidad"
+  ) +
+  theme_minimal()
+```
+
+## 4- Seleccionar dos variables numéricas y crear un gráfico de dispersión para estudiar la relación entre ambas variables. ¿Observa algún patrón en el gráfico interesante? Explique ese patrón en caso de existir. Puede probar con otras variables.
+### Relación entre Petal.Length y Petal.Width
+
+```{r}
+ggplot(iris, aes(x = Largo_Petalo, y = Ancho_Petalo, color = Especie)) +
+  geom_point() +  
+  labs(title = "Relación entre el largo y el ancho del pétalo",
+       x = "Longitud del pétalo",
+       y = "Ancho del pétalo") +
+  theme_minimal()
+```
+
+### Patrones: En las especies versicolor y virginica, observamos que conforme aumenta la longitud del pétalo, también tiende a aumentar su ancho. Las flores de setosa tienen tanto un Petal.Length como un Petal.Width más pequeños en comparación con las otras especies. Según el análisis setosa tiene una morfología distinta al resto de especies.
